@@ -2,6 +2,8 @@ package org.eborda.junitapp.ejemplos.models;
 
 import org.eborda.junitapp.ejemplos.exceptions.DineroInsuficienteException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -12,6 +14,7 @@ class CuentaTest {
 
     //Para indicar a la plataforma al test engine de que es este método debe ser ejectutar como prueba unitaria, con la siguiente anotación
     @Test
+    @DisplayName("Probando nombre de la cuenta!")
     void testNombreCuenta() {
         //Preparamos nuestra prueba unitaria
         Cuenta cuenta = new Cuenta("Emerson", new BigDecimal("1000.123")); //Instanciamos la cuenta
@@ -21,14 +24,16 @@ class CuentaTest {
         String esperado = "Emerson";
         //versus la realidad
         String real = cuenta.getPersona();
-        assertNotNull(real);
+        assertNotNull(real, () -> "La cuenta no puede ser nula");
 
         //Sino se verifica nada, el test es correcto.
-        assertEquals(esperado, real); //assertions es afirmar un valor que sea el correcto el que estamos esperando
-        assertTrue(real.equals("Emerson")); //dentro del assertTrue, tenemos una expresión booleana
+        assertEquals(esperado, real, () -> "El nombre de la cuenta no es el que se esperaba" + esperado
+                + " sin embargo fue " + real); //assertions es afirmar un valor que sea el correcto el que estamos esperando
+        assertTrue(real.equals("Emerson"), () -> "El nombre cuenta esperada debe ser igual a la real"); //dentro del assertTrue, tenemos una expresión booleana
     }
 
     @Test
+    @DisplayName("Verificar el saldo de la cuenta conrriente, que no sea null, mayor que ser, valor esperado!")
     void testSaldoCuenta() {
         Cuenta cuenta = new Cuenta("Emerson", new BigDecimal("1000.123"));
         assertNotNull(cuenta.getSaldo());
@@ -38,6 +43,7 @@ class CuentaTest {
     }
 
     @Test
+    @DisplayName("Testeando referencias que sean iguales con el método equals.")
     void testReferenciaCuenta() {
         Cuenta cuenta = new Cuenta("John Doe", new BigDecimal("8900.9997"));
         Cuenta cuenta2 = new Cuenta("John Doe", new BigDecimal("8900.9997"));
@@ -88,7 +94,10 @@ class CuentaTest {
     }
 
     @Test
+    @Disabled //No ejecuta el método testRelacionBandoCuentas. Es para saltar el método de prueba
+    @DisplayName("Probando relaciones entre las cuentas y el bando con assertAll")
     void testRelacionBancoCuentas() {
+        fail(); //fuerza el error, es un mmpetodo estático de la clase assertions, aseguramos que fallará el método
         Cuenta cuenta1 = new Cuenta("John Doe", new BigDecimal("2500"));
         Cuenta cuenta2 = new Cuenta("Emerson", new BigDecimal("1500.8989"));
 
@@ -100,16 +109,18 @@ class CuentaTest {
         banco.transferir(cuenta2, cuenta1, new BigDecimal(500));
         assertAll(() ->
                 {
-                    assertEquals("1000.898", cuenta2.getSaldo().toPlainString());
+                    assertEquals("1000.8989", cuenta2.getSaldo().toPlainString(),
+                            () -> "El valor del saldo de la cuenta2 no es el esperado");
                 },
                 () -> {
-                    assertEquals("3000", cuenta1.getSaldo().toPlainString());
+                    assertEquals("3000", cuenta1.getSaldo().toPlainString(),
+                            () -> "El banco no tiene las cuentas esperadas");
                 },
                 () -> {
                     assertEquals(2, banco.getCuentas().size());
                 },
                 () -> {
-                    assertEquals("Banco del Estado.", cuenta1.getBanco().getNombre());
+                    assertEquals("Banco del Estado", cuenta1.getBanco().getNombre());
                 },
                 () -> {
                     assertEquals("Emerson", banco.getCuentas().stream()
