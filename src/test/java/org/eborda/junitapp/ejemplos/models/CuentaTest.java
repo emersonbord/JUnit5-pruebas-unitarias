@@ -1,23 +1,49 @@
 package org.eborda.junitapp.ejemplos.models;
 
 import org.eborda.junitapp.ejemplos.exceptions.DineroInsuficienteException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CuentaTest {
+
+    Cuenta cuenta;
+
+    @BeforeEach
+        //Se ejecute antes de cada método
+    void initMetodoTest() {
+        this.cuenta = new Cuenta("Emerson", new BigDecimal("1000.123")); //Instanciamos la cuenta
+        System.out.println("Iniciando el método");
+    }
+
+    @AfterEach
+    void tearDown() {
+        System.out.println("Finalizando el método de prueba.");
+    }
+
+    @BeforeAll //Se ejecuta una sola vez. Método estático, antes de que se cree la instancia
+    static void beforeAll() {
+        System.out.println("Inicializando el test");
+    }
+
+    @AfterAll
+    //Despues de que se hayan ejecutado todos los métodos de pruebas
+    static void afterAll() {
+        System.out.println("Finalizando el test");
+
+    }
 
     //Para indicar a la plataforma al test engine de que es este método debe ser ejectutar como prueba unitaria, con la siguiente anotación
     @Test
     @DisplayName("Probando nombre de la cuenta!")
     void testNombreCuenta() {
         //Preparamos nuestra prueba unitaria
-        Cuenta cuenta = new Cuenta("Emerson", new BigDecimal("1000.123")); //Instanciamos la cuenta
         //pasamos datos, input que son datos de pruebas
         //cuenta.setPersona("Emerson");
         //Cómo afirmar que esto es cierto? siempre en pruebas unitarias vamos a tener un valor esperado o espectativa
@@ -35,7 +61,6 @@ class CuentaTest {
     @Test
     @DisplayName("Verificar el saldo de la cuenta conrriente, que no sea null, mayor que ser, valor esperado!")
     void testSaldoCuenta() {
-        Cuenta cuenta = new Cuenta("Emerson", new BigDecimal("1000.123"));
         assertNotNull(cuenta.getSaldo());
         assertEquals(1000.123, cuenta.getSaldo().doubleValue());
         assertFalse(cuenta.getSaldo().compareTo(BigDecimal.ZERO) < 0);
@@ -54,7 +79,6 @@ class CuentaTest {
 
     @Test
     void testDebitoCuenta() {
-        Cuenta cuenta = new Cuenta("Emerson", new BigDecimal("1000.123"));
         cuenta.debito(new BigDecimal(100));
         assertNotNull(cuenta.getSaldo());
         assertEquals(900, cuenta.getSaldo().intValue());
@@ -63,7 +87,6 @@ class CuentaTest {
 
     @Test
     void testCreditoCuenta() {
-        Cuenta cuenta = new Cuenta("Emerson", new BigDecimal("1000.123"));
         cuenta.credito(new BigDecimal(100));
         assertNotNull(cuenta.getSaldo());
         assertEquals(1100, cuenta.getSaldo().intValue());
@@ -72,7 +95,6 @@ class CuentaTest {
 
     @Test
     void testDineroInsuficienteException() {
-        Cuenta cuenta = new Cuenta("Emerson", new BigDecimal("1000.123"));
         Exception exception = assertThrows(DineroInsuficienteException.class, () -> {
             //invocamos al método que va a lanzar la excepción
             cuenta.debito(new BigDecimal(1600));//se captura
@@ -94,10 +116,10 @@ class CuentaTest {
     }
 
     @Test
-    @Disabled //No ejecuta el método testRelacionBandoCuentas. Es para saltar el método de prueba
+    //@Disabled //No ejecuta el método testRelacionBandoCuentas. Es para saltar el método de prueba
     @DisplayName("Probando relaciones entre las cuentas y el bando con assertAll")
     void testRelacionBancoCuentas() {
-        fail(); //fuerza el error, es un mmpetodo estático de la clase assertions, aseguramos que fallará el método
+        //  fail(); //fuerza el error, es un mmpetodo estático de la clase assertions, aseguramos que fallará el método
         Cuenta cuenta1 = new Cuenta("John Doe", new BigDecimal("2500"));
         Cuenta cuenta2 = new Cuenta("Emerson", new BigDecimal("1500.8989"));
 
@@ -136,5 +158,22 @@ class CuentaTest {
         //probar la relación en ambos sentidos, 2 es la cantidad de cuentas
         //assertEquals(2, banco.getCuentas().size());
 
+    }
+
+    @Test
+    @EnabledOnOs(OS.WINDOWS)//Condicional para ejecutar este método en windows
+    void testSoloWindows() {
+
+    }
+
+    @Test
+    @EnabledOnOs({OS.LINUX, OS.MAC})//Condicional para ejecutar el método en Linux y Mac
+    void testSoloLinuxMac() {
+
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS) //Condicional para no ejecutar este método en windows
+    void testNoWindows() {
     }
 }
