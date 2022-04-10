@@ -7,6 +7,7 @@
     <groupId>org.eborda.junitapp</groupId>
     <artifactId>junit_app</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <!-- Agregar esta dependencia para instalar JUnit5 -->
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
